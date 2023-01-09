@@ -45,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
             public void onLocationChanged(Location location) {
                 // This method is called when the location is updated
                 float speed = location.getSpeed();
-                // Convert speed from meters per second to km/h
                 speed = speed * 3.6f;
-                speedTextView.setText(String.format("Sp: %.2f km/h", speed));
+                // Round the speed value to the nearest integer
+                int roundedSpeed = Math.round(speed);
+                speedTextView.setText(String.format("Sp: %d km/h", roundedSpeed));
 
                 // Calculate distance and time since last update
                 float distance = 0;
@@ -66,15 +67,16 @@ public class MainActivity extends AppCompatActivity {
                 // Calculate average speed
                 float avspeed = totalDistance / totalTime;
                 // Convert speed from meters per second to km/h
-                avspeed = avspeed * 3.6f;
-                avspeedTextView.setText(String.format("Avg: %.2f km/h",avspeed));
-
+                // Round the average speed value to the nearest integer
+                int roundedAvspeed = Math.round(avspeed);
+                avspeedTextView.setText(String.format("Avg: %d km/h", roundedAvspeed));
                 // Update top speed
                 if (speed > topSpeed) {
                     topSpeed = speed;
                 }
-                // Display top speed
-                TspeedTextView.setText(String.format("Top: %.2f km/h", topSpeed));
+                // Round the top speed value to the nearest integer
+                int roundedTopSpeed = Math.round(topSpeed);
+                TspeedTextView.setText(String.format("Top: %d km/h", roundedTopSpeed));
             }
 
             // Other methods of the LocationListener interface
