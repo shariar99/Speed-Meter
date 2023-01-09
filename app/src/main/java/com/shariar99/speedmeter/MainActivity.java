@@ -65,16 +65,14 @@ public class MainActivity extends AppCompatActivity {
                 totalTime += time;
 
                 // Calculate average speed
-                float avspeed = totalDistance / totalTime;
-                // Convert speed from meters per second to km/h
-                avspeed = speed * 3.6f;
+                float avspeed = totalDistance / totalTime * 3.6f;
                 // Round the average speed value to the nearest integer
                 int roundedAvspeed = Math.round(avspeed);
                 avspeedTextView.setText(String.format("Avg: %d km/h", roundedAvspeed));
                 // Update top speed
                 if (speed > topSpeed) {
                     topSpeed = speed;
-                    topSpeed = speed * 3.6f;
+                    topSpeed = topSpeed * 3.6f;
                 }
                 // Round the top speed value to the nearest integer
                 int roundedTopSpeed = Math.round(topSpeed);
