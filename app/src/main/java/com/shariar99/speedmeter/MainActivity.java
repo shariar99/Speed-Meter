@@ -1,5 +1,4 @@
 package com.shariar99.speedmeter;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -12,80 +11,75 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+    // Declare variables
     Location previousLocation = null;
-    Location currentLocation = null;
     long previousTime = 0;
     float topSpeed = 0;
+    float totalDistance = 0;
+    long totalTime = 0;
 
-
-
+    TextView speedTextView;
+    TextView avspeedTextView;
+    TextView TspeedTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView speedTextView = findViewById(R.id.speedTextView);
-        TextView avspeedTextView = findViewById(R.id.avspeedTextView);
-        TextView TspeedTextView =findViewById(R.id.TspeedTextView);
+        // Initialize TextViews
+        speedTextView = findViewById(R.id.speedTextView);
+        avspeedTextView = findViewById(R.id.avspeedTextView);
+        TspeedTextView =findViewById(R.id.TspeedTextView);
 
-
-
+        // Get current time
         previousTime = System.currentTimeMillis();
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                currentLocation = location;
-                previousTime = System.currentTimeMillis();
-
                 // This method is called when the location is updated
                 float speed = location.getSpeed();
                 // Convert speed from meters per second to km/h
                 speed = speed * 3.6f;
                 speedTextView.setText(String.format("Sp: %.2f km/h", speed));
 
-                //avarage distance
+                // Calculate distance and time since last update
                 float distance = 0;
+                long time = 0;
                 if (previousLocation != null) {
-                    distance = currentLocation.distanceTo(previousLocation);
+                    distance = location.distanceTo(previousLocation);
+                    time = location.getTime() - previousTime;
                 }
-                previousLocation = currentLocation;
+                previousLocation = location;
+                previousTime = location.getTime();
 
-                // Calculate time taken since last update
-                long time = currentLocation.getTime() - previousTime;
-                previousTime = currentLocation.getTime();
+                // Update total distance and time
+                totalDistance += distance;
+                totalTime += time;
 
                 // Calculate average speed
-                float avspeed = distance / time;
-
+                float avspeed = totalDistance / totalTime;
                 // Convert speed from meters per second to km/h
-                avspeed = speed * 3.6f;
+                avspeed = avspeed * 3.6f;
                 avspeedTextView.setText(String.format("Avg: %.2f km/h",avspeed));
 
                 // Update top speed
                 if (speed > topSpeed) {
                     topSpeed = speed;
                 }
-
-                // Display speed and top speed
+                // Display top speed
                 TspeedTextView.setText(String.format("Top: %.2f km/h", topSpeed));
-
             }
 
             // Other methods of the LocationListener interface
         });
     }
 }
+
+
