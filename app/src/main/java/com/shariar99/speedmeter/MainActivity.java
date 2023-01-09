@@ -11,21 +11,31 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import de.nitri.gauge.Gauge;
-
-
 public class MainActivity extends AppCompatActivity {
-    Gauge speedMeter;
+    Location previousLocation = null;
+    Location currentLocation = null;
+    long previousTime = 0;
+    float topSpeed = 0;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        speedMeter = findViewById(R.id.gauge);
+
         TextView speedTextView = findViewById(R.id.speedTextView);
+        TextView avspeedTextView = findViewById(R.id.avspeedTextView);
+        TextView TspeedTextView =findViewById(R.id.TspeedTextView);
+
+
+
+        previousTime = System.currentTimeMillis();
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -38,14 +48,41 @@ public class MainActivity extends AppCompatActivity {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                currentLocation = location;
+                previousTime = System.currentTimeMillis();
+
                 // This method is called when the location is updated
                 float speed = location.getSpeed();
                 // Convert speed from meters per second to km/h
                 speed = speed * 3.6f;
+                speedTextView.setText(String.format("Sp: %.2f km/h", speed));
 
-                speedTextView.setText(String.format("%.2f km/h", speed));
-               float speedM = speed * 10.6f;
-                speedMeter.setValue(speedM);
+                //avarage distance
+                float distance = 0;
+                if (previousLocation != null) {
+                    distance = currentLocation.distanceTo(previousLocation);
+                }
+                previousLocation = currentLocation;
+
+                // Calculate time taken since last update
+                long time = currentLocation.getTime() - previousTime;
+                previousTime = currentLocation.getTime();
+
+                // Calculate average speed
+                float avspeed = distance / time;
+
+                // Convert speed from meters per second to km/h
+                avspeed = speed * 3.6f;
+                avspeedTextView.setText(String.format("Avg: %.2f km/h",avspeed));
+
+                // Update top speed
+                if (speed > topSpeed) {
+                    topSpeed = speed;
+                }
+
+                // Display speed and top speed
+                TspeedTextView.setText(String.format("Top: %.2f km/h", topSpeed));
+
             }
 
             // Other methods of the LocationListener interface
